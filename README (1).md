@@ -1,0 +1,191 @@
+# AutoLyrics 🎵
+### Fine-Tuning Whisper for Singing Voice Transcription using LoRA
+
+> Fine-tuned OpenAI Whisper-small for singing voice transcription using parameter-efficient LoRA adaptation, achieving **29.7% relative WER reduction** over the zero-shot baseline across 3 controlled experiments on the JamendoLyrics dataset.
+
+---
+
+## Overview
+
+Standard ASR systems are trained on spoken language and struggle significantly with singing audio due to pitch variations, prolonged phonemes, rhythmic pacing, and overlapping background instrumentation. **AutoLyrics** addresses this by adapting Whisper-small for lyric transcription using LoRA (Low-Rank Adaptation) — a parameter-efficient fine-tuning technique that trains only ~1-2% of model parameters while keeping the rest frozen.
+
+---
+
+## Results
+
+| Experiment | WER | CER | Relative WER Reduction |
+|---|---|---|---|
+| Baseline (Zero-shot Whisper) | 30.40% | 21.20% | — |
+| Exp 2: LoRA Decoder Only | 21.92% | 16.23% | **27.9%** |
+| Exp 3: LoRA Encoder + Decoder | 21.37% | 15.37% | **29.7%** |
+
+Key finding: Applying LoRA to both encoder and decoder outperforms decoder-only adaptation, demonstrating that acoustic feature adaptation (encoder) is important for singing-specific inputs, not just text generation (decoder).
+
+---
+
+## Architecture
+
+```
+Singing Audio (.wav)
+        ↓
+  Resample to 16kHz
+        ↓
+  Log-Mel Spectrogram (WhisperProcessor)
+        ↓
+  Whisper Encoder (LoRA adapted)
+        ↓
+  Whisper Decoder (LoRA adapted)
+        ↓
+  Predicted Lyrics (text)
+        ↓
+  WER / CER Evaluation (jiwer)
+```
+
+---
+
+## Dataset
+
+- **Source:** [JamendoLyrics](https://huggingface.co/datasets/jamendolyrics/jamendolyrics) — royalty-free music with word-level time-aligned lyrics
+- **Subset:** 20 English songs filtered from 79 multilingual songs
+- **Chunking:** Songs split into 30-second segments → 94 train / 21 val / 22 test chunks
+- **Split strategy:** Split by song (not randomly) to prevent data leakage
+
+---
+
+## LoRA Configuration
+
+| Parameter | Value |
+|---|---|
+| Rank (r) | 8 |
+| Alpha | 32 |
+| Dropout | 0.1 |
+| Target modules | q_proj, v_proj (attention layers) |
+| Trainable parameters | ~1-2% of total |
+| Task type | Seq2Seq LM |
+
+---
+
+## Experiments
+
+**Experiment 1 — Zero-shot Baseline**
+Vanilla Whisper-small evaluated on singing audio with no modifications. Establishes reference WER/CER.
+
+**Experiment 2 — LoRA Decoder Only**
+LoRA adapters injected into decoder self-attention and cross-attention layers. Improves lyric generation quality.
+
+**Experiment 3 — LoRA Encoder + Decoder**
+LoRA applied to both encoder and decoder attention layers. Best performance — encoder adaptation helps the model learn singing-specific acoustic patterns like pitch variations and vibrato.
+
+---
+
+## Tech Stack
+
+| Category | Tools |
+|---|---|
+| Base Model | OpenAI Whisper-small |
+| Fine-tuning | PEFT / LoRA (HuggingFace) |
+| Framework | PyTorch, HuggingFace Transformers |
+| Dataset | HuggingFace Datasets |
+| Audio | Torchaudio |
+| Evaluation | jiwer (WER / CER) |
+| Training | Google Colab (T4 GPU) |
+
+---
+
+## Project Structure
+
+```
+autolyrics/
+├── data/
+│   ├── raw/               ← original audio + lyrics
+│   ├── splits/            ← train/val/test CSV splits
+│   └── processed/         ← preprocessed chunks
+├── src/
+│   ├── preprocess.py      ← chunking + feature extraction
+│   ├── dataset.py         ← HuggingFace dataset builder
+│   ├── train.py           ← LoRA training loop
+│   ├── evaluate.py        ← WER/CER evaluation
+│   └── demo.py            ← Gradio demo
+├── results/
+│   ├── baseline_wer.txt
+│   ├── exp2_results.txt
+│   ├── exp3_results.txt
+│   └── final_results.txt
+├── report/
+│   └── AutoLyrics_Report.pdf
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Setup
+
+```bash
+git clone https://github.com/<your-username>/autolyrics
+cd autolyrics
+pip install -r requirements.txt
+```
+
+**requirements.txt**
+```
+transformers>=4.40.0
+datasets>=2.21.0
+peft>=0.10.0
+accelerate>=1.1.0
+torchaudio
+jiwer
+gradio
+torch
+```
+
+---
+
+## Qualitative Analysis
+
+Example output comparison on a held-out test song:
+
+| | Text |
+|---|---|
+| **Ground Truth** | send thirty messages drunk and dirty messages drunk but i don't look no i can't be to look i could not breathe you took your toll on me |
+| **Baseline Whisper** | send 30 messages drunk and dirty messages drunk but i don't look no i can't be put to luck i cannot breathe you took your toll on me |
+| **AutoLyrics (Exp 3)** | send thirty messages drunk and dirty messages drunk but i don't look no i can't be to look i could not breathe you took your toll on me |
+
+Notable improvements after fine-tuning:
+- Number normalization ("30" → "thirty")
+- Reduced hallucination on sustained notes
+- Better handling of repeated chorus sections
+- Improved phoneme disambiguation under instrumental accompaniment
+
+---
+
+## Challenges
+
+- **Small dataset (94 chunks):** Required careful regularization (weight decay, early stopping) to prevent overfitting
+- **Polyphonic audio:** Instrumental accompaniment masks vocal phonemes — a fundamental challenge for singing ASR
+- **Chunking alignment:** Word-level timestamps from JamendoLyrics used to pair each 30s audio chunk with correct ground truth lyrics
+- **PEFT + Whisper compatibility:** Required custom training loop to bypass a PEFT routing bug with Whisper's encoder-decoder architecture
+
+---
+
+## Future Work
+
+- Train on larger singing datasets (DALI, MIR-1K)
+- Apply vocal source separation before transcription
+- Experiment with larger Whisper variants (medium, large-v3)
+- Add timestamp prediction for karaoke-style alignment
+- Deploy as real-time Gradio web application
+
+---
+
+## References
+
+- Radford et al., [Robust Speech Recognition via Large-Scale Weak Supervision](https://arxiv.org/abs/2212.04356) (Whisper)
+- Hu et al., [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)
+- Durand et al., [Contrastive Learning-Based Audio to Lyrics Alignment](https://arxiv.org/abs/2306.07744) (JamendoLyrics)
+- [HuggingFace PEFT Documentation](https://huggingface.co/docs/peft)
+- [JiWER — ASR Evaluation Library](https://github.com/jitsi/jiwer)
+
+---
+
+*Built by Sanjana Jayaganthan — IIT Guwahati (240102083)*
