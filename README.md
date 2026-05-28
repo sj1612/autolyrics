@@ -92,30 +92,6 @@ LoRA applied to both encoder and decoder attention layers. Best performance — 
 
 ---
 
-## Project Structure
-
-```
-autolyrics/
-├── data/
-│   ├── raw/               ← original audio + lyrics
-│   ├── splits/            ← train/val/test CSV splits
-│   └── processed/         ← preprocessed chunks
-├── src/
-│   ├── preprocess.py      ← chunking + feature extraction
-│   ├── dataset.py         ← HuggingFace dataset builder
-│   ├── train.py           ← LoRA training loop
-│   ├── evaluate.py        ← WER/CER evaluation
-│   └── demo.py            ← Gradio demo
-├── results/
-│   ├── baseline_wer.txt
-│   ├── exp2_results.txt
-│   ├── exp3_results.txt
-│   └── final_results.txt
-├── report/
-│   └── AutoLyrics_Report.pdf
-├── requirements.txt
-└── README.md
-```
 
 ---
 
