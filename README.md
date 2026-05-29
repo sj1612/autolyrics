@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AutoLyrics 
 ### Fine-Tuning Whisper for Singing Voice Transcription using LoRA
 
@@ -12,6 +13,16 @@ Standard ASR systems are trained on spoken language and struggle significantly w
 ---
 
 ## Results
+=======
+# AutoLyrics 🎵
+### Fine-Tuning Whisper for Singing Voice Transcription using LoRA
+
+> Adapted OpenAI's Whisper-small for singing voice transcription using parameter-efficient LoRA adaptation, achieving a **29.7% relative WER reduction** over the zero-shot baseline across controlled experiments on the JamendoLyrics dataset. Now equipped with a production-grade modular pipeline and deployable web demos!
+
+---
+
+## 🚀 Key Achievements & Results
+>>>>>>> 261f71a (Initial commit: Modular code and deployable web apps)
 
 | Experiment | WER | CER | Relative WER Reduction |
 |---|---|---|---|
@@ -19,6 +30,7 @@ Standard ASR systems are trained on spoken language and struggle significantly w
 | Exp 2: LoRA Decoder Only | 21.92% | 16.23% | **27.9%** |
 | Exp 3: LoRA Encoder + Decoder | 21.37% | 15.37% | **29.7%** |
 
+<<<<<<< HEAD
 Key finding: Applying LoRA to both encoder and decoder outperforms decoder-only adaptation, demonstrating that acoustic feature adaptation (encoder) is important for singing-specific inputs, not just text generation (decoder).
 
 ---
@@ -39,10 +51,33 @@ Singing Audio (.wav)
   Predicted Lyrics (text)
         ↓
   WER / CER Evaluation (jiwer)
+=======
+*Key finding: Applying LoRA to both the encoder and decoder outperforms decoder-only adaptation, demonstrating that acoustic feature adaptation (encoder) is vital for singing-specific inputs (pitch shifts, vibratos), not just language generation (decoder).*
+
+---
+
+## 📁 Project Architecture
+
+The project has been refactored from a monolithic notebook into a production-grade modular codebase:
+
+```
+autolyrics/
+├── src/
+│   ├── preprocess.py      ← resampling (16kHz), song-level partitioning, and 30s chunking
+│   ├── dataset.py         ← PyTorch custom dataset and dynamic padding collator
+│   ├── train.py           ← fully parameterized early-stopping trainer (supports multiple languages)
+│   ├── evaluate.py        ← JIWER evaluation engine with text normalizations
+│   └── demo.py            ← Gradio web app with premium aesthetic dark-mode UI
+├── app.py                 ← HF Spaces deployment entry point
+├── streamlit_app.py       ← Streamlit Community Cloud web app
+├── requirements.txt       ← Pip dependency list
+└── README.md              ← You are here!
+>>>>>>> 261f71a (Initial commit: Modular code and deployable web apps)
 ```
 
 ---
 
+<<<<<<< HEAD
 ## Dataset
 
 - **Source:** [JamendoLyrics](https://huggingface.co/datasets/jamendolyrics/jamendolyrics) — royalty-free music with word-level time-aligned lyrics
@@ -113,10 +148,66 @@ torchaudio
 jiwer
 gradio
 torch
+=======
+## 🛠️ Installation & Setup
+
+1. Clone the repository and navigate into the folder:
+```bash
+git clone https://github.com/<YOUR-USERNAME>/autolyrics.git
+cd autolyrics
+```
+
+2. Install the required dependencies:
+```bash
+pip install -r requirements.txt
 ```
 
 ---
 
+## 🏃 Running the Pipeline
+
+All scripts support a robust Command Line Interface (CLI) allowing you to customize languages, checkpoints, and parameters.
+
+### 1. Data Preprocessing
+Preprocess and inspect chunk splits for any target language (e.g., English `en`, French `fr`, Spanish `es`):
+```bash
+python src/preprocess.py --language en
+```
+
+### 2. Fine-Tuning (LoRA)
+Fine-tune Whisper-small on singing audio using early-stopping custom PyTorch loops:
+```bash
+# Fine-tune on English songs
+python src/train.py --language en --mode both --save_dir checkpoints/exp3_both_en
+
+# Fine-tune on French songs
+python src/train.py --language fr --mode both --save_dir checkpoints/exp3_both_fr
+```
+
+### 3. Quantitative Evaluation
+Evaluate any trained adapter against the baseline zero-shot model:
+```bash
+# Evaluate English baseline
+python src/evaluate.py --language en
+
+# Evaluate your custom English LoRA adapter
+python src/evaluate.py --language en --lora_dir checkpoints/exp3_both_en/best --save_results results/lora_en_results.txt
+```
+
+### 4. Interactive Web Demos
+Run either user interface locally on your machine:
+```bash
+# Launch Gradio Demo
+python src/demo.py --port 7860
+
+# Launch Streamlit Demo
+streamlit run streamlit_app.py
+>>>>>>> 261f71a (Initial commit: Modular code and deployable web apps)
+```
+
+---
+
+<<<<<<< HEAD
 ## Qualitative Analysis
 
 Example output comparison on a held-out test song:
@@ -165,3 +256,30 @@ Notable improvements after fine-tuning:
 ---
 
 *Built by Sanjana Jayaganthan — IIT Guwahati (240102083)*
+=======
+## ☁️ Deployment
+
+This project is configured out-of-the-box for **1-click free cloud hosting**:
+
+*   **Hugging Face Spaces**: Integrates directly with the root-level `app.py`. Just create a Gradio Space on Hugging Face and upload the files.
+*   **Streamlit Community Cloud**: Integrates directly with `streamlit_app.py`. Connect your public GitHub repository to Streamlit Cloud to launch!
+
+---
+
+## 🔬 Qualitative Analysis Examples
+
+Notable improvements after fine-tuning include:
+*   **Number Normalization**: Caster text normalization maps numeric values correctly (`"30"` $\rightarrow$ `"thirty"`).
+*   **Reduced Hallucinations**: Standard Whisper often hallucinates or gets stuck in a loop on sustained vocal notes; the adapted model manages sustained vocals and overlapping instrumentation smoothly.
+
+---
+
+## 🔮 Future Work
+*   Train on massive multi-lingual datasets (DALI, MIR-1K).
+*   Apply vocal source separation (e.g., Demucs) as a preprocessing pipeline step to isolate vocal tracks before transcribing.
+*   Integrate real-time vocal timestamping for karaoke-style visual outputs.
+
+---
+
+*Project developed and engineered by Sanjana Jayaganthan — IIT Guwahati (240102083)*
+>>>>>>> 261f71a (Initial commit: Modular code and deployable web apps)
