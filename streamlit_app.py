@@ -62,7 +62,9 @@ def load_transcription_engine(model_type, lora_path, base_model="openai/whisper-
         model = WhisperForConditionalGeneration.from_pretrained(base_model)
         active_type = "Baseline (Zero-Shot)"
     else:
-        if not os.path.exists(lora_path):
+        # Check if the adapter configuration file actually exists to avoid empty folder crashes
+        config_path = os.path.join(lora_path, "adapter_config.json")
+        if not os.path.exists(config_path):
             model = WhisperForConditionalGeneration.from_pretrained(base_model)
             active_type = "Baseline (Zero-Shot) [Fallback]"
         else:
