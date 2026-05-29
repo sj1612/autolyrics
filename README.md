@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+Live demo- https://autolyrics-b8hbwps8sxnrsprjl2gzdk.streamlit.app/
 # AutoLyrics 
 ### Fine-Tuning Whisper for Singing Voice Transcription using LoRA
 
