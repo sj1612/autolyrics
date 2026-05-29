@@ -47,11 +47,14 @@ def transcribe_audio(audio_file, model_selection):
     if audio_file is None:
         return "⚠️ Please record or upload an audio file first."
         
+    # Get absolute path of project root directory (parent of src/)
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
     # Get parameters matching selection
     if model_selection == "Experiment 2: LoRA Decoder Only":
-        lora_path = "checkpoints/exp2_decoder/best"
+        lora_path = os.path.join(BASE_DIR, "checkpoints", "exp2_decoder", "best")
     elif model_selection == "Experiment 3: LoRA Encoder + Decoder":
-        lora_path = "checkpoints/exp3_both/best"
+        lora_path = os.path.join(BASE_DIR, "checkpoints", "exp3_both", "best")
     else:
         lora_path = ""
         

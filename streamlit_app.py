@@ -113,11 +113,14 @@ model_selection = st.selectbox(
     index=2
 )
 
+# Get absolute path of current file's directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Set model checkpoint paths
 if model_selection == "Experiment 2: LoRA Decoder Only":
-    lora_path = "checkpoints/exp2_decoder/best"
+    lora_path = os.path.join(BASE_DIR, "checkpoints", "exp2_decoder", "best")
 elif model_selection == "Experiment 3: LoRA Encoder + Decoder":
-    lora_path = "checkpoints/exp3_both/best"
+    lora_path = os.path.join(BASE_DIR, "checkpoints", "exp3_both", "best")
 else:
     lora_path = ""
 
