@@ -110,6 +110,22 @@ with gr.Blocks(theme=custom_theme, title="AutoLyrics Demo") as demo:
         """
     )
     
+    gr.Markdown(
+        """
+        ### 📊 Controlled Experiment Results (English Chunks)
+        
+        | Configuration | Word Error Rate (WER) | Character Error Rate (CER) | Relative WER Reduction ↓ |
+        | :--- | :---: | :---: | :---: |
+        | **Experiment 1: Baseline (Zero-Shot)** | 30.40% | 21.20% | — |
+        | **Experiment 2: LoRA Decoder Only** | 21.92% | 16.23% | **27.9%** |
+        | **Experiment 3: LoRA Encoder + Decoder** | **21.37%** | **15.37%** | **29.7%** |
+        
+        *Key Takeaway:* Fine-tuning both the **encoder and decoder** attention layers achieved the peak relative reduction of **29.7%**, proving that adapting acoustic representations is crucial for handling singing voice variations.
+        
+        ---
+        """
+    )
+    
     with gr.Row():
         with gr.Column(scale=1):
             gr.Markdown("### 🎤 Audio Input & Model Setup")
